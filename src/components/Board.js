@@ -96,7 +96,7 @@ export default function Board() {
     }
 
     const moveDownASquare = () => {
-        for (let i = 0; i < board.length - width; i++) {
+        for (let i = board.length - 1; i >= 0; i--) {
 
             // generate random candy into blank squares
             if (firstRowIndexes.includes(i) && board[i] === Blank) {
@@ -104,9 +104,9 @@ export default function Board() {
             }
 
             // move candy to square below
-            if (board[i + width] === Blank) {
-                board[i + width] = board[i];
-                board[i] = Blank;
+            if (board[i] === Blank) {
+                board[i] = board[i - width];
+                board[i - width] = Blank;
             }
         }
     }
@@ -120,33 +120,35 @@ export default function Board() {
     }
 
     const onDragEnd = () => {
-        const candyBeingDraggedIndex = parseInt(draggedCandy.getAttribute('data-index'));
-        const candyBeingReplacedIndex = parseInt(candyToBeSwitch.getAttribute('data-index'));
+        if (draggedCandy && candyToBeSwitch) {
+            const candyBeingDraggedIndex = parseInt(draggedCandy.getAttribute('data-index'));
+            const candyBeingReplacedIndex = parseInt(candyToBeSwitch.getAttribute('data-index'));
 
-        const validMoves = [
-            candyBeingDraggedIndex - width,
-            candyBeingDraggedIndex + 1,
-            candyBeingDraggedIndex + width,
-            candyBeingDraggedIndex - 1
-        ];
-        const isValidMove = validMoves.includes(candyBeingReplacedIndex);
+            const validMoves = [
+                candyBeingDraggedIndex - width,
+                candyBeingDraggedIndex + 1,
+                candyBeingDraggedIndex + width,
+                candyBeingDraggedIndex - 1
+            ];
+            const isValidMove = validMoves.includes(candyBeingReplacedIndex);
 
-        if (isValidMove) {
-            board[candyBeingDraggedIndex] = candyToBeSwitch.getAttribute('src');
-            board[candyBeingReplacedIndex] = draggedCandy.getAttribute('src');
+            if (isValidMove) {
+                board[candyBeingDraggedIndex] = candyToBeSwitch.getAttribute('src');
+                board[candyBeingReplacedIndex] = draggedCandy.getAttribute('src');
 
-            const isAColumnOfFour = checkForColumnOfFour();
-            const isARowOfFour = checkForRowOfFour();
-            const isAColumnOfThree = checkForColumnOfThree();
-            const isARowOfThree = checkForRowOfThree();
+                const isAColumnOfFour = checkForColumnOfFour();
+                const isARowOfFour = checkForRowOfFour();
+                const isAColumnOfThree = checkForColumnOfThree();
+                const isARowOfThree = checkForRowOfThree();
 
-            if (candyToBeSwitch && (isAColumnOfFour || isARowOfFour || isAColumnOfThree || isARowOfThree) ) {
-                setDraggedCandy(null);
-                setCandyToBeSwitch(null);
-            } else {
-                board[candyBeingDraggedIndex] = draggedCandy.getAttribute('src');
-                board[candyBeingReplacedIndex] = candyToBeSwitch.getAttribute('src');
-                setBoard([...board])
+                if (candyToBeSwitch && (isAColumnOfFour || isARowOfFour || isAColumnOfThree || isARowOfThree) ) {
+                    setDraggedCandy(null);
+                    setCandyToBeSwitch(null);
+                } else {
+                    board[candyBeingDraggedIndex] = draggedCandy.getAttribute('src');
+                    board[candyBeingReplacedIndex] = candyToBeSwitch.getAttribute('src');
+                    setBoard([...board])
+                }
             }
         }
     }
@@ -163,7 +165,7 @@ export default function Board() {
             checkForRowOfThree();
             moveDownASquare();
             setBoard([...board]);
-        }, 200);
+        }, 150);
         return () => clearInterval(timer);
 
     }, [checkForColumnOfFour, checkForRowOfFour, checkForColumnOfThree, checkForRowOfThree, moveDownASquare, board])
