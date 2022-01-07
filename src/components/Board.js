@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useContext} from 'react'
 import RedCandy from '../images/red-candy.png'
 import GreenCandy from '../images/green-candy.png'
 import PurpleCandy from '../images/purple-candy.png'
@@ -6,6 +6,7 @@ import BlueCandy from '../images/blue-candy.png'
 import YellowCandy from '../images/yellow-candy.png'
 import OrangeCandy from '../images/orange-candy.png'
 import Blank from '../images/blank.png'
+import { ScoreContext } from './ScoreContext'
 
 const width = 8;
 
@@ -24,6 +25,7 @@ export default function Board() {
     const [board, setBoard] = useState([]);
     const [draggedCandy, setDraggedCandy] = useState(null);
     const [candyToBeSwitch, setCandyToBeSwitch] = useState(null);
+    const {score, setScore} = useContext(ScoreContext);
 
     const createBoard = () => {
         const randomBoard = [];
@@ -33,7 +35,7 @@ export default function Board() {
 
         setBoard(randomBoard);
     }
-    
+
     const checkForColumnOfFour = () => {
         for (let i = 0; i < (width * width) - (width * 3); i++) {
             const candiesToCheck = [i, i + width, i + width * 2, i + width * 3];
@@ -42,6 +44,7 @@ export default function Board() {
 
             if (candiesToCheck.every(candyToCheck => board[candyToCheck] === colorToBeCheck) && !isBlank) {
                 candiesToCheck.forEach(candyToCheck => board[candyToCheck] = Blank);
+                setScore(score + 4);
                 return true;
             }
         }
@@ -59,6 +62,7 @@ export default function Board() {
             
             if (candiesToCheck.every(candyToCheck => board[candyToCheck] === colorToBeCheck) && !isBlank) {
                 candiesToCheck.forEach(candyToCheck => board[candyToCheck] = Blank);
+                setScore(score + 4);
                 return true;
             }
         }
@@ -72,6 +76,7 @@ export default function Board() {
 
             if (candiesToCheck.every(candyToCheck => board[candyToCheck] === colorToBeCheck) && !isBlank) {
                 candiesToCheck.forEach(candyToCheck => board[candyToCheck] = Blank);
+                setScore(score + 3);
                 return true;
             }
         }
@@ -90,6 +95,7 @@ export default function Board() {
             
             if (candiesToCheck.every(candyToCheck => board[candyToCheck] === colorToBeCheck) && !isBlank) {
                 candiesToCheck.forEach(candyToCheck => board[candyToCheck] = Blank);
+                setScore(score + 3);
                 return true;
             }
         }
