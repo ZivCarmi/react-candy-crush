@@ -8,14 +8,14 @@ app = express();
 const port = 8000;
 
 app.use(cors());
-app.use(express.json())
+app.use(express.json());
 
 mongoose.connect(process.env.DB_CONNECT, {
     useNewUrlParser: true,
 });
 
 app.listen(port, (req, res) => {
-    console.log(`server is listenings on port ${port}`)
+    console.log(`Server is listenings on port ${port}`);
 });
 
 const scoreModel = require('./Models/Score');
@@ -39,9 +39,9 @@ app.get('/getrankings', async (req, res) => {
     const topTenScores = await scoreModel.find().sort('-score').limit(10).exec();
 
     try {
-        res.status(200).json(topTenScores)
+        res.status(200).json(topTenScores);
     } catch (err) {
-        res.status(200).json('Couldn\'t get rankings')
+        res.status(200).json('Couldn\'t get rankings');
         console.log(err);
     }
 });
