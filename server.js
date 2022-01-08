@@ -1,12 +1,12 @@
 require('dotenv').config();
-const port = 8000;
-
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const mongoose = require('mongoose');
 
 app = express();
+const port = 8000;
+
 app.use(cors());
 app.use(express.json())
 
@@ -14,12 +14,11 @@ mongoose.connect(process.env.DB_CONNECT, {
     useNewUrlParser: true,
 });
 
-const scoreModel = require('./Models/Score');
-
 app.listen(port, (req, res) => {
     console.log(`server is listenings on port ${port}`)
-    console.log();
 });
+
+const scoreModel = require('./Models/Score');
 
 app.post('/addscore', async (req, res) => {
     //--- delete all documents in scores collection
