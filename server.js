@@ -1,4 +1,5 @@
-const PORT = 8000;
+require('dotenv').config();
+const port = 8000;
 
 const express = require('express');
 const cors = require('cors');
@@ -9,14 +10,15 @@ app = express();
 app.use(cors());
 app.use(express.json())
 
-mongoose.connect('mongodb+srv://carmizon:jeM2W47cUkAMwR9@candy-crush.asqik.mongodb.net/candy-crush?retryWrites=true&w=majority', {
+mongoose.connect(process.env.DB_CONNECT, {
     useNewUrlParser: true,
 });
 
 const scoreModel = require('./Models/Score');
 
-app.listen(PORT, (req, res) => {
-    console.log(`server is listenings on port ${PORT}`)
+app.listen(port, (req, res) => {
+    console.log(`server is listenings on port ${port}`)
+    console.log();
 });
 
 app.post('/addscore', async (req, res) => {
