@@ -7,6 +7,7 @@ import YellowCandy from '../images/yellow-candy.png'
 import OrangeCandy from '../images/orange-candy.png'
 import Blank from '../images/blank.png'
 import { ScoreContext } from './ScoreContext'
+import Hints from './Hints'
 
 const width = 8;
 
@@ -26,6 +27,9 @@ export default function Board() {
     const [draggedCandy, setDraggedCandy] = useState(null);
     const [candyToBeSwitch, setCandyToBeSwitch] = useState(null);
     const {score, setScore} = useContext(ScoreContext);
+    const [isHintClicked, setIsHintClicked] = useState(false);
+    const [cursor, setCursor] = useState(null);
+    const [candyToHammer, setCandyToHammer] = useState(null);
 
     const createBoard = () => {
         const randomBoard = [];
@@ -34,6 +38,38 @@ export default function Board() {
         }
 
         setBoard(randomBoard);
+    }
+
+    const checkForColumnOfFive = () => {
+        for (let i = 0; i < (width * width) - (width * 4); i++) {
+            const candiesToCheck = [i, i + width, i + width * 2, i + width * 3, i + width * 4];
+            const colorToBeCheck = board[i];
+            const isBlank = board[i] === Blank;
+
+            if (candiesToCheck.every(candyToCheck => board[candyToCheck] === colorToBeCheck) && !isBlank) {
+                candiesToCheck.forEach(candyToCheck => board[candyToCheck] = Blank);
+                setScore(score + 5);
+                return true;
+            }
+        }
+    }
+
+    const checkForRowOfFive = () => {
+        for (let i = 0; i < (width * width) - 4; i++) {
+            const candiesToPassCheck = [4,5,6,7,12,13,14,15,20,21,22,23,28,29,30,31,36,37,38,39,44,45,46,47,52,53,54,55];
+
+            if (candiesToPassCheck.includes(i)) continue;
+
+            const candiesToCheck = [i, i + 1, i + 2, i + 3, i + 4];
+            const colorToBeCheck = board[i];
+            const isBlank = board[i] === Blank;
+            
+            if (candiesToCheck.every(candyToCheck => board[candyToCheck] === colorToBeCheck) && !isBlank) {
+                candiesToCheck.forEach(candyToCheck => board[candyToCheck] = Blank);
+                setScore(score + 5);
+                return true;
+            }
+        }
     }
 
     const checkForColumnOfFour = () => {
@@ -75,7 +111,7 @@ export default function Board() {
             const isBlank = board[i] === Blank;
 
             if (candiesToCheck.every(candyToCheck => board[candyToCheck] === colorToBeCheck) && !isBlank) {
-                candiesToCheck.forEach(candyToCheck => board[candyToCheck] = Blank);
+                candiesToCheck.forEach(candyToCheck =>  board[candyToCheck] = Blank);
                 setScore(score + 3);
                 return true;
             }
@@ -142,12 +178,20 @@ export default function Board() {
                 board[candyBeingDraggedIndex] = candyToBeSwitch.getAttribute('src');
                 board[candyBeingReplacedIndex] = draggedCandy.getAttribute('src');
 
+                const isAColumnOfFive = checkForColumnOfFive();
+                const isARowOfFive = checkForRowOfFive();
                 const isAColumnOfFour = checkForColumnOfFour();
                 const isARowOfFour = checkForRowOfFour();
                 const isAColumnOfThree = checkForColumnOfThree();
                 const isARowOfThree = checkForRowOfThree();
 
-                if (candyToBeSwitch && (isAColumnOfFour || isARowOfFour || isAColumnOfThree || isARowOfThree) ) {
+                if (candyToBeSwitch &&
+                    (isAColumnOfFive ||
+                    isARowOfFive ||
+                    isAColumnOfFour ||
+                    isARowOfFour ||
+                    isAColumnOfThree ||
+                    isARowOfThree)) {
                     setDraggedCandy(null);
                     setCandyToBeSwitch(null);
                 } else {
@@ -159,40 +203,53 @@ export default function Board() {
         }
     }
 
+    const setCandyToHammerTarget = e => {
+        setCandyToHammer(e.target);
+    }
+
     useEffect(() => {
         createBoard();
     }, []);
 
     useEffect(() => {
         const timer = setInterval(() => {
+            checkForColumnOfFive();
+            checkForRowOfFive();
             checkForColumnOfFour();
             checkForRowOfFour();
             checkForColumnOfThree();
             checkForRowOfThree();
             moveDownASquare();
             setBoard([...board]);
-        }, 150);
+        }, 200);
         return () => clearInterval(timer);
 
-    }, [checkForColumnOfFour, checkForRowOfFour, checkForColumnOfThree, checkForRowOfThree, moveDownASquare, board])
+    }, [checkForColumnOfFive, checkForRowOfFive, checkForColumnOfFour, checkForRowOfFour, checkForColumnOfThree, checkForRowOfThree, moveDownASquare, board])
 
     return (
-        <div className="board">
-            {board.map((candy, index) => {
-                return (
-                    <img src={candy} className="candy"
-                    data-index={index}
-                    key={index}
-                    draggable="true"
-                    onDragStart={onDragStart}
-                    onDrop={onDragDrop}
-                    onDragOver={e => e.preventDefault()}
-                    onDragEnter={e => e.preventDefault()}
-                    onDragLeave={e => e.preventDefault()}
-                    onDragEnd={onDragEnd}
-                    />
-                );
-            })}
+        <div className={`board-container${cursor ? ' custom-cursor' : ''}`} style={{cursor: cursor ? `${cursor}, auto` : ''}}>
+            <div className="board">
+                {board.map((candy, index) => {
+                    return (
+                        <img
+                        src={candy}
+                        alt=""
+                        className="candy"
+                        data-index={index}
+                        key={index}
+                        draggable="true"
+                        onDragStart={onDragStart}
+                        onDrop={onDragDrop}
+                        onDragOver={e => e.preventDefault()}
+                        onDragEnter={e => e.preventDefault()}
+                        onDragLeave={e => e.preventDefault()}
+                        onDragEnd={onDragEnd}
+                        onClick={isHintClicked ? setCandyToHammerTarget : null}
+                        />
+                    );
+                })}
+            </div>
+            <Hints boardState={{board, setBoard}} cursorState={{cursor, setCursor}} isHintClickedState={{isHintClicked, setIsHintClicked}} candyToHammerState={{candyToHammer, setCandyToHammer}}/>
         </div>
     )
 }

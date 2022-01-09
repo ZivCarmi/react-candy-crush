@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Board from './components/Board';
 import Score from './components/Score';
 import Head from './components/Head';
