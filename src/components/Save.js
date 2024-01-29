@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { useScore } from "./ScoreProvider";
+import { BASE_URL } from "../config";
 
 export default function Save() {
   const { score } = useScore();
@@ -32,7 +33,7 @@ export default function Save() {
     };
 
     axios
-      .post("http://localhost:8000/addscore", scoreData)
+      .post(`${BASE_URL}/addscore`, scoreData)
       .then((response) => {
         if (response.status === 200) {
           setMessage(response.data.message);
