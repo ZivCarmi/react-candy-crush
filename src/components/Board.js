@@ -1,13 +1,13 @@
-import { useState, useEffect, useContext } from "react";
-import RedCandy from "../images/red-candy.png";
-import GreenCandy from "../images/green-candy.png";
-import PurpleCandy from "../images/purple-candy.png";
-import BlueCandy from "../images/blue-candy.png";
-import YellowCandy from "../images/yellow-candy.png";
-import OrangeCandy from "../images/orange-candy.png";
+import { useEffect, useState } from "react";
 import Blank from "../images/blank.png";
-import { ScoreContext } from "./ScoreContext";
+import BlueCandy from "../images/blue-candy.png";
+import GreenCandy from "../images/green-candy.png";
+import OrangeCandy from "../images/orange-candy.png";
+import PurpleCandy from "../images/purple-candy.png";
+import RedCandy from "../images/red-candy.png";
+import YellowCandy from "../images/yellow-candy.png";
 import Hints from "./Hints";
+import { useScore } from "./ScoreProvider";
 
 const width = 8;
 
@@ -26,7 +26,7 @@ export default function Board() {
   const [board, setBoard] = useState([]);
   const [draggedCandy, setDraggedCandy] = useState(null);
   const [candyToBeSwitch, setCandyToBeSwitch] = useState(null);
-  const { score, setScore } = useContext(ScoreContext);
+  const { score, setScore } = useScore();
   const [isHintClicked, setIsHintClicked] = useState(false);
   const [cursor, setCursor] = useState(null);
   const [candyToHammer, setCandyToHammer] = useState(null);
@@ -273,6 +273,7 @@ export default function Board() {
       moveDownASquare();
       setBoard([...board]);
     }, 200);
+
     return () => clearInterval(timer);
   }, [
     checkForColumnOfFive,

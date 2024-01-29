@@ -1,29 +1,19 @@
-import { useState } from 'react';
-import Board from './components/Board';
-import Score from './components/Score';
-import Head from './components/Head';
-import Save from './components/Save';
-import Rankings from './components/Rankings';
-import { ScoreContext } from './components/ScoreContext';
+import Board from "./components/Board";
+import Head from "./components/Head";
+import Score from "./components/Score";
+import SidePanel from "./components/SidePanel";
 
 function App() {
-  const [score, setScore] = useState(0);
-
   return (
     <div className="App">
       <Head />
-      <ScoreContext.Provider value={{score, setScore}}>
-        <div className="game-panel">
-          <div className="game-container">
-            <Score />
-            <Board />
-          </div>
-          <div className="side-panel">
-            {score ? <Save /> : null}
-            <Rankings />
-          </div>
+      <div className="game-panel">
+        <div className="game-container">
+          <Score />
+          <Board />
         </div>
-      </ScoreContext.Provider>
+        <SidePanel />
+      </div>
     </div>
   );
 }
