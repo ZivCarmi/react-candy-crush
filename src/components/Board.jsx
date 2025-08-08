@@ -14,6 +14,7 @@ export default function Board() {
   const [candyToHammer, setCandyToHammer] = useState(null);
   const [lastCandyReplaced, setLastCandyReplaced] = useState(null);
   const [boardBeforeDrag, setBoardBeforeDrag] = useState([]);
+  const [draggedTouchId, setDraggedTouchId] = useState(null);
 
   const createBoard = () => {
     const randomBoard = [];
@@ -221,15 +222,21 @@ export default function Board() {
 
   const onTouchStart = (e) => {
     if (board.includes(Blank)) return;
-    setDraggedCandy(e.touches[0].target);
+    const touch = e.touches[0];
+    setDraggedCandy(touch.target);
     setIsDragging(true);
     setBoardBeforeDrag([...board]);
+    setDraggedTouchId(touch.identifier);
   };
 
   const onTouchMove = (e) => {
     e.preventDefault();
     if (isDragging) {
-      const touch = e.touches[0];
+      const touch = Array.from(e.touches).find(
+        (t) => t.identifier === draggedTouchId
+      );
+      if (!touch) return;
+
       const element = document.elementFromPoint(touch.clientX, touch.clientY);
       if (element) {
         const candyBeingDraggedIndex = parseInt(
@@ -261,8 +268,14 @@ export default function Board() {
   };
 
   const onTouchEnd = (e) => {
+    const touch = Array.from(e.changedTouches).find(
+      (t) => t.identifier === draggedTouchId
+    );
+    if (!touch) return;
+
     onDragEnd();
     setIsDragging(false);
+    setDraggedTouchId(null);
   };
 
   const onDragEnd = () => {
