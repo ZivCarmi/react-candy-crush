@@ -283,7 +283,7 @@ export default function Board() {
 
   return (
     <div
-      className={`${cursor ? "custom-cursor" : ""}`}
+      className={`touch-none ${cursor ? "custom-cursor" : ""}`}
       style={{ cursor: cursor ? `${cursor}, auto` : "" }}
     >
       <div className="grid grid-cols-8">
