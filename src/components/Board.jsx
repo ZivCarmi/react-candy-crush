@@ -291,6 +291,9 @@ export default function Board() {
               onDragLeave={(e) => e.preventDefault()}
               onDragEnd={onDragEnd}
               onClick={isHintClicked ? setCandyToHammerTarget : null}
+              onTouchStart={onDragStart}
+              onTouchMove={onDragDrop}
+              onTouchEnd={onDragEnd}
             />
           );
         })}
