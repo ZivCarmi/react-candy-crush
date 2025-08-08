@@ -194,14 +194,19 @@ export default function Board() {
 
   const onTouchMove = (e) => {
     e.preventDefault();
-    const touch = e.touches[0];
+  };
+
+  const onTouchEnd = (e) => {
+    const touch = e.changedTouches[0];
     const element = document.elementFromPoint(touch.clientX, touch.clientY);
     if (element) {
       setCandyToBeSwitch(element);
     }
+    onDragEnd();
   };
 
   const onDragEnd = () => {
+    "";
     if (draggedCandy && candyToBeSwitch) {
       const candyBeingDraggedIndex = parseInt(
         draggedCandy.getAttribute("data-index")
@@ -306,7 +311,7 @@ export default function Board() {
               onClick={isHintClicked ? setCandyToHammerTarget : null}
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
-              onTouchEnd={onDragEnd}
+              onTouchEnd={onTouchEnd}
             />
           );
         })}
