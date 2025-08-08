@@ -7,7 +7,6 @@ import { useScore } from "./ScoreProvider";
 export default function Board() {
   const [board, setBoard] = useState([]);
   const [draggedCandy, setDraggedCandy] = useState(null);
-  const [candyToBeSwitch, setCandyToBeSwitch] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const { score, setScore } = useScore();
   const [isHintClicked, setIsHintClicked] = useState(false);
@@ -184,13 +183,10 @@ export default function Board() {
   };
 
   const onDragStart = (e) => {
+    if (board.includes(Blank)) return;
     setDraggedCandy(e.target);
     setIsDragging(true);
     setBoardBeforeDrag([...board]);
-  };
-
-  const onDragDrop = (e) => {
-    setCandyToBeSwitch(e.target);
   };
 
   const onDragOver = (e) => {
@@ -224,6 +220,7 @@ export default function Board() {
   };
 
   const onTouchStart = (e) => {
+    if (board.includes(Blank)) return;
     setDraggedCandy(e.touches[0].target);
     setIsDragging(true);
     setBoardBeforeDrag([...board]);
@@ -243,8 +240,6 @@ export default function Board() {
         );
 
         if (candyBeingReplacedIndex === lastCandyReplaced) return;
-
-        setCandyToBeSwitch(element);
 
         const validMoves = [
           candyBeingDraggedIndex - width,
@@ -266,23 +261,16 @@ export default function Board() {
   };
 
   const onTouchEnd = (e) => {
-    const touch = e.changedTouches[0];
-    const element = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (element) {
-      setCandyToBeSwitch(element);
-    }
     onDragEnd();
     setIsDragging(false);
   };
 
   const onDragEnd = () => {
-    if (draggedCandy && candyToBeSwitch) {
+    if (draggedCandy && lastCandyReplaced) {
       const candyBeingDraggedIndex = parseInt(
         draggedCandy.getAttribute("data-index")
       );
-      const candyBeingReplacedIndex = parseInt(
-        candyToBeSwitch.getAttribute("data-index")
-      );
+      const candyBeingReplacedIndex = lastCandyReplaced;
 
       const validMoves = [
         candyBeingDraggedIndex - width,
@@ -324,7 +312,6 @@ export default function Board() {
 
     setIsDragging(false);
     setDraggedCandy(null);
-    setCandyToBeSwitch(null);
     setLastCandyReplaced(null);
     setBoardBeforeDrag([]);
   };
@@ -344,24 +331,14 @@ export default function Board() {
       checkForRowOfFive(board);
       checkForColumnOfFour(board);
       checkForRowOfFour(board);
-      checkForColumnOfThree(board);
+      checkForRowOfThree(board);
       checkForRowOfThree(board);
       moveDownASquare();
       setBoard([...board]);
     }, 200);
 
     return () => clearInterval(timer);
-  }, [
-    checkForColumnOfFive,
-    checkForRowOfFive,
-    checkForColumnOfFour,
-    checkForRowOfFour,
-    checkForColumnOfThree,
-    checkForRowOfThree,
-    moveDownASquare,
-    board,
-    isDragging,
-  ]);
+  }, [board, isDragging]);
 
   return (
     <div
@@ -378,14 +355,10 @@ export default function Board() {
               height={70}
               data-index={index}
               key={index}
-              draggable="true"
+              draggable={!board.includes(Blank)}
               onDragStart={onDragStart}
-              onDrop={onDragDrop}
               onDragOver={onDragOver}
-              onDragEnter={(e) => {
-                e.preventDefault();
-                setCandyToBeSwitch(e.target);
-              }}
+              onDragEnter={(e) => e.preventDefault()}
               onDragLeave={(e) => e.preventDefault()}
               onDragEnd={onDragEnd}
               onClick={isHintClicked ? setCandyToHammerTarget : null}
