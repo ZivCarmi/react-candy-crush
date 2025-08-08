@@ -221,7 +221,7 @@ export default function Board() {
   };
 
   const onTouchStart = (e) => {
-    if (board.includes(Blank)) return;
+    if (board.includes(Blank) || isDragging) return;
     const touch = e.touches[0];
     setDraggedCandy(touch.target);
     setIsDragging(true);
