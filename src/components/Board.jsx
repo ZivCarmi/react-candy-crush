@@ -344,14 +344,23 @@ export default function Board() {
       checkForRowOfFive(board);
       checkForColumnOfFour(board);
       checkForRowOfFour(board);
-      checkForRowOfThree(board);
+      checkForColumnOfThree(board);
       checkForRowOfThree(board);
       moveDownASquare();
       setBoard([...board]);
     }, 200);
 
     return () => clearInterval(timer);
-  }, [board, isDragging]);
+  }, [
+    checkForColumnOfFive,
+    checkForRowOfFive,
+    checkForColumnOfFour,
+    checkForRowOfFour,
+    checkForColumnOfThree,
+    checkForRowOfThree,
+    board,
+    isDragging,
+  ]);
 
   return (
     <div
