@@ -5,6 +5,8 @@ import Blank from "../images/blank.png";
 export const useDragAndDrop = ({
   board,
   setBoard,
+  isDragging,
+  setIsDragging,
   checkForColumnOfFive,
   checkForRowOfFive,
   checkForColumnOfFour,
@@ -13,7 +15,6 @@ export const useDragAndDrop = ({
   checkForRowOfThree,
 }) => {
   const [draggedCandy, setDraggedCandy] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [lastCandyReplaced, setLastCandyReplaced] = useState(null);
   const [boardBeforeDrag, setBoardBeforeDrag] = useState([]);
   const [draggedTouchId, setDraggedTouchId] = useState(null);
@@ -165,7 +166,6 @@ export const useDragAndDrop = ({
   };
 
   return {
-    isDragging,
     onDragStart,
     onDragOver,
     onDragEnd,
