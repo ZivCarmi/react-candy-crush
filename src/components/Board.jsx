@@ -8,10 +8,13 @@ export default function Board() {
   const [board, setBoard] = useState([]);
   const [draggedCandy, setDraggedCandy] = useState(null);
   const [candyToBeSwitch, setCandyToBeSwitch] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
   const { score, setScore } = useScore();
   const [isHintClicked, setIsHintClicked] = useState(false);
   const [cursor, setCursor] = useState(null);
   const [candyToHammer, setCandyToHammer] = useState(null);
+  const [lastCandyReplaced, setLastCandyReplaced] = useState(null);
+  const [boardBeforeDrag, setBoardBeforeDrag] = useState([]);
 
   const createBoard = () => {
     const randomBoard = [];
@@ -24,7 +27,7 @@ export default function Board() {
     setBoard(randomBoard);
   };
 
-  const checkForColumnOfFive = () => {
+  const checkForColumnOfFive = (board) => {
     for (let i = 0; i < width * width - width * 4; i++) {
       const candiesToCheck = [
         i,
@@ -49,7 +52,7 @@ export default function Board() {
     }
   };
 
-  const checkForRowOfFive = () => {
+  const checkForRowOfFive = (board) => {
     for (let i = 0; i < width * width - 4; i++) {
       const candiesToPassCheck = [
         4, 5, 6, 7, 12, 13, 14, 15, 20, 21, 22, 23, 28, 29, 30, 31, 36, 37, 38,
@@ -75,7 +78,7 @@ export default function Board() {
     }
   };
 
-  const checkForColumnOfFour = () => {
+  const checkForColumnOfFour = (board) => {
     for (let i = 0; i < width * width - width * 3; i++) {
       const candiesToCheck = [i, i + width, i + width * 2, i + width * 3];
       const colorToBeCheck = board[i];
@@ -94,7 +97,7 @@ export default function Board() {
     }
   };
 
-  const checkForRowOfFour = () => {
+  const checkForRowOfFour = (board) => {
     for (let i = 0; i < width * width - 3; i++) {
       const candiesToPassCheck = [
         5, 6, 7, 13, 14, 15, 21, 22, 23, 29, 30, 31, 37, 38, 39, 45, 46, 47, 53,
@@ -120,7 +123,7 @@ export default function Board() {
     }
   };
 
-  const checkForColumnOfThree = () => {
+  const checkForColumnOfThree = (board) => {
     for (let i = 0; i < width * width - width * 2; i++) {
       const candiesToCheck = [i, i + width, i + width * 2];
       const colorToBeCheck = board[i];
@@ -139,7 +142,7 @@ export default function Board() {
     }
   };
 
-  const checkForRowOfThree = () => {
+  const checkForRowOfThree = (board) => {
     for (let i = 0; i < width * width - 2; i++) {
       // need to rethink that array to be dynamic
       const candiesToPassCheck = [
@@ -182,18 +185,84 @@ export default function Board() {
 
   const onDragStart = (e) => {
     setDraggedCandy(e.target);
+    setIsDragging(true);
+    setBoardBeforeDrag([...board]);
   };
 
   const onDragDrop = (e) => {
     setCandyToBeSwitch(e.target);
   };
 
+  const onDragOver = (e) => {
+    e.preventDefault();
+    if (isDragging) {
+      const candyBeingDraggedIndex = parseInt(
+        draggedCandy.getAttribute("data-index")
+      );
+      const candyBeingReplacedIndex = parseInt(
+        e.target.getAttribute("data-index")
+      );
+
+      if (candyBeingReplacedIndex === lastCandyReplaced) return;
+
+      const validMoves = [
+        candyBeingDraggedIndex - width,
+        candyBeingDraggedIndex + 1,
+        candyBeingDraggedIndex + width,
+        candyBeingDraggedIndex - 1,
+      ];
+      const isValidMove = validMoves.includes(candyBeingReplacedIndex);
+
+      if (isValidMove) {
+        const newBoard = [...board];
+        newBoard[candyBeingDraggedIndex] = e.target.getAttribute("src");
+        newBoard[candyBeingReplacedIndex] = draggedCandy.getAttribute("src");
+        setBoard(newBoard);
+        setLastCandyReplaced(candyBeingReplacedIndex);
+      }
+    }
+  };
+
   const onTouchStart = (e) => {
     setDraggedCandy(e.touches[0].target);
+    setIsDragging(true);
+    setBoardBeforeDrag([...board]);
   };
 
   const onTouchMove = (e) => {
     e.preventDefault();
+    if (isDragging) {
+      const touch = e.touches[0];
+      const element = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (element) {
+        const candyBeingDraggedIndex = parseInt(
+          draggedCandy.getAttribute("data-index")
+        );
+        const candyBeingReplacedIndex = parseInt(
+          element.getAttribute("data-index")
+        );
+
+        if (candyBeingReplacedIndex === lastCandyReplaced) return;
+
+        setCandyToBeSwitch(element);
+
+        const validMoves = [
+          candyBeingDraggedIndex - width,
+          candyBeingDraggedIndex + 1,
+          candyBeingDraggedIndex + width,
+          candyBeingDraggedIndex - 1,
+        ];
+        const isValidMove = validMoves.includes(candyBeingReplacedIndex);
+
+        if (isValidMove) {
+          const newBoard = [...board];
+          newBoard[candyBeingDraggedIndex] = element.getAttribute("src");
+          newBoard[candyBeingReplacedIndex] = draggedCandy.getAttribute("src");
+          setBoard(newBoard);
+          setLastCandyReplaced(candyBeingReplacedIndex);
+        }
+      }
+    }
   };
 
   const onTouchEnd = (e) => {
@@ -203,10 +272,10 @@ export default function Board() {
       setCandyToBeSwitch(element);
     }
     onDragEnd();
+    setIsDragging(false);
   };
 
   const onDragEnd = () => {
-    "";
     if (draggedCandy && candyToBeSwitch) {
       const candyBeingDraggedIndex = parseInt(
         draggedCandy.getAttribute("data-index")
@@ -224,34 +293,40 @@ export default function Board() {
       const isValidMove = validMoves.includes(candyBeingReplacedIndex);
 
       if (isValidMove) {
-        board[candyBeingDraggedIndex] = candyToBeSwitch.getAttribute("src");
-        board[candyBeingReplacedIndex] = draggedCandy.getAttribute("src");
+        const newBoard = [...boardBeforeDrag];
+        const temp = newBoard[candyBeingDraggedIndex];
+        newBoard[candyBeingDraggedIndex] = newBoard[candyBeingReplacedIndex];
+        newBoard[candyBeingReplacedIndex] = temp;
 
-        const isAColumnOfFive = checkForColumnOfFive();
-        const isARowOfFive = checkForRowOfFive();
-        const isAColumnOfFour = checkForColumnOfFour();
-        const isARowOfFour = checkForRowOfFour();
-        const isAColumnOfThree = checkForColumnOfThree();
-        const isARowOfThree = checkForRowOfThree();
+        const isAColumnOfFive = checkForColumnOfFive(newBoard);
+        const isARowOfFive = checkForRowOfFive(newBoard);
+        const isAColumnOfFour = checkForColumnOfFour(newBoard);
+        const isARowOfFour = checkForRowOfFour(newBoard);
+        const isAColumnOfThree = checkForColumnOfThree(newBoard);
+        const isARowOfThree = checkForRowOfThree(newBoard);
 
         if (
-          candyToBeSwitch &&
-          (isAColumnOfFive ||
-            isARowOfFive ||
-            isAColumnOfFour ||
-            isARowOfFour ||
-            isAColumnOfThree ||
-            isARowOfThree)
+          isAColumnOfFive ||
+          isARowOfFive ||
+          isAColumnOfFour ||
+          isARowOfFour ||
+          isAColumnOfThree ||
+          isARowOfThree
         ) {
-          setDraggedCandy(null);
-          setCandyToBeSwitch(null);
+          setBoard(newBoard);
         } else {
-          board[candyBeingDraggedIndex] = draggedCandy.getAttribute("src");
-          board[candyBeingReplacedIndex] = candyToBeSwitch.getAttribute("src");
-          setBoard([...board]);
+          setBoard(boardBeforeDrag);
         }
+      } else {
+        setBoard(boardBeforeDrag);
       }
     }
+
+    setIsDragging(false);
+    setDraggedCandy(null);
+    setCandyToBeSwitch(null);
+    setLastCandyReplaced(null);
+    setBoardBeforeDrag([]);
   };
 
   const setCandyToHammerTarget = (e) => {
@@ -263,13 +338,14 @@ export default function Board() {
   }, []);
 
   useEffect(() => {
+    if (isDragging) return;
     const timer = setInterval(() => {
-      checkForColumnOfFive();
-      checkForRowOfFive();
-      checkForColumnOfFour();
-      checkForRowOfFour();
-      checkForColumnOfThree();
-      checkForRowOfThree();
+      checkForColumnOfFive(board);
+      checkForRowOfFive(board);
+      checkForColumnOfFour(board);
+      checkForRowOfFour(board);
+      checkForColumnOfThree(board);
+      checkForRowOfThree(board);
       moveDownASquare();
       setBoard([...board]);
     }, 200);
@@ -284,6 +360,7 @@ export default function Board() {
     checkForRowOfThree,
     moveDownASquare,
     board,
+    isDragging,
   ]);
 
   return (
@@ -304,8 +381,11 @@ export default function Board() {
               draggable="true"
               onDragStart={onDragStart}
               onDrop={onDragDrop}
-              onDragOver={(e) => e.preventDefault()}
-              onDragEnter={(e) => e.preventDefault()}
+              onDragOver={onDragOver}
+              onDragEnter={(e) => {
+                e.preventDefault();
+                setCandyToBeSwitch(e.target);
+              }}
               onDragLeave={(e) => e.preventDefault()}
               onDragEnd={onDragEnd}
               onClick={isHintClicked ? setCandyToHammerTarget : null}
